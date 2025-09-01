@@ -1,0 +1,381 @@
+{% extends "base.html" %}
+
+{% block title %}Generate Synthetic Data - Scoliosis Prediction System{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-4 text-center mb-5">
+                <i class="fas fa-database me-3"></i>
+                Generate Synthetic Data
+            </h1>
+        </div>
+    </div>
+    
+    <!-- Data Generation Form -->
+    <div class="row mb-5">
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-sliders-h me-2"></i>
+                        Generation Parameters
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="generateForm">
+                        <div class="mb-3">
+                            <label for="nPatients" class="form-label">Number of Patients</label>
+                            <input type="number" class="form-control" id="nPatients" min="10" max="10000" value="100">
+                            <div class="form-text">Generate between 10 and 10,000 synthetic patients</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Dataset Characteristics</label>
+                            <div class="small text-muted">
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success me-1"></i> Age: 10-16 years (μ=13.2, σ=1.8)</li>
+                                    <li><i class="fas fa-check text-success me-1"></i> Sex: 80% Female, 20% Male</li>
+                                    <li><i class="fas fa-check text-success me-1"></i> Initial Cobb: 10-40° (μ=22.5, σ=8.5)</li>
+                                    <li><i class="fas fa-check text-success me-1"></i> Follow-up: 6, 12, 24 months</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-play me-2"></i>
+                            Generate Data
+                        </button>
+                    </form>
+                    
+                    <!-- Loading indicator -->
+                    <div id="loading" class="loading text-center mt-3">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Generating synthetic data...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Results Panel -->
+        <div class="col-lg-8">
+            <div id="resultsPanel" style="display: none;">
+                <!-- Summary Statistics -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-pie me-2"></i>
+                            Dataset Summary
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" id="summaryStats">
+                            <!-- Summary stats will be populated here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Interactive Visualizations -->
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Interactive Data Visualization
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <button id="visualizeBtn" class="btn btn-info">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Generate Interactive Charts
+                        </button>
+                        <div id="visualizationContainer" class="mt-3" style="display: none;">
+                            <!-- Interactive Plotly charts will be rendered here -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div id="ageDistChart" class="plotly-chart"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div id="cobbScatterChart" class="plotly-chart"></div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div id="riskPieChart" class="plotly-chart"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div id="sexBarChart" class="plotly-chart"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Data Table -->
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-table me-2"></i>
+                            Sample Data (First 10 Patients)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="dataTable">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Patient ID</th>
+                                        <th>Age</th>
+                                        <th>Sex</th>
+                                        <th>Risser</th>
+                                        <th>BMI</th>
+                                        <th>Initial Cobb (°)</th>
+                                        <th>24m Cobb (°)</th>
+                                        <th>Risk Level</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dataTableBody">
+                                    <!-- Data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Download Options -->
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-download me-2"></i>
+                            Download Options
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex gap-2">
+                            <button id="downloadCsvBtn" class="btn btn-outline-primary">
+                                <i class="fas fa-file-csv me-2"></i>
+                                Download CSV
+                            </button>
+                            <button id="downloadJsonBtn" class="btn btn-outline-secondary">
+                                <i class="fas fa-file-code me-2"></i>
+                                Download JSON
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let generatedData = null;
+
+document.getElementById('generateForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const nPatients = document.getElementById('nPatients').value;
+    
+    // Show loading
+    showLoading('loading');
+    document.getElementById('resultsPanel').style.display = 'none';
+    
+    try {
+        const response = await fetch('/api/generate_data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                n_patients: parseInt(nPatients)
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            generatedData = result.data;
+            displayResults(result);
+            showAlert('Data generated successfully!', 'success');
+        } else {
+            showAlert('Error generating data: ' + result.error, 'danger');
+        }
+    } catch (error) {
+        showAlert('Error: ' + error.message, 'danger');
+    } finally {
+        hideLoading('loading');
+    }
+});
+
+function displayResults(result) {
+    // Display summary statistics
+    const summaryStats = document.getElementById('summaryStats');
+    summaryStats.innerHTML = `
+        <div class="col-md-3">
+            <div class="text-center">
+                <h4 class="text-primary">${result.summary.total_patients}</h4>
+                <small class="text-muted">Total Patients</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="text-center">
+                <h4 class="text-danger">${result.summary.high_risk}</h4>
+                <small class="text-muted">High Risk</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="text-center">
+                <h4 class="text-warning">${result.summary.moderate_risk}</h4>
+                <small class="text-muted">Moderate Risk</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="text-center">
+                <h4 class="text-success">${result.summary.low_risk}</h4>
+                <small class="text-muted">Low Risk</small>
+            </div>
+        </div>
+    `;
+    
+    // Display sample data in table
+    const tableBody = document.getElementById('dataTableBody');
+    tableBody.innerHTML = '';
+    
+    const sampleData = result.data.slice(0, 10); // Show first 10 patients
+    sampleData.forEach(patient => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${patient.patient_id}</td>
+            <td>${patient.age}</td>
+            <td>${patient.sex}</td>
+            <td>${patient.risser_sign}</td>
+            <td>${patient.bmi}</td>
+            <td>${patient.initial_cobb}</td>
+            <td>${patient.cobb_24m}</td>
+            <td>${formatRiskLevel(patient.progression_risk)}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+    
+    // Show results panel
+    document.getElementById('resultsPanel').style.display = 'block';
+}
+
+// Interactive visualization button
+document.getElementById('visualizeBtn').addEventListener('click', async function() {
+    if (!generatedData) {
+        showAlert('No data to visualize. Please generate data first.', 'warning');
+        return;
+    }
+    
+    this.disabled = true;
+    this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generating...';
+    
+    try {
+        const response = await fetch('/api/visualize_data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                patients_data: generatedData
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Render interactive Plotly charts
+            const graphs = result.graphs;
+            
+            // Age distribution
+            Plotly.newPlot('ageDistChart', JSON.parse(graphs.age_dist).data, 
+                          JSON.parse(graphs.age_dist).layout, {responsive: true});
+            
+            // Cobb angle scatter
+            Plotly.newPlot('cobbScatterChart', JSON.parse(graphs.cobb_scatter).data, 
+                          JSON.parse(graphs.cobb_scatter).layout, {responsive: true});
+            
+            // Risk pie chart
+            Plotly.newPlot('riskPieChart', JSON.parse(graphs.risk_pie).data, 
+                          JSON.parse(graphs.risk_pie).layout, {responsive: true});
+            
+            // Sex bar chart
+            Plotly.newPlot('sexBarChart', JSON.parse(graphs.sex_bar).data, 
+                          JSON.parse(graphs.sex_bar).layout, {responsive: true});
+            
+            document.getElementById('visualizationContainer').style.display = 'block';
+            showAlert('Interactive visualizations generated successfully!', 'success');
+        } else {
+            showAlert('Error generating visualization: ' + result.error, 'danger');
+        }
+    } catch (error) {
+        showAlert('Error: ' + error.message, 'danger');
+    } finally {
+        this.disabled = false;
+        this.innerHTML = '<i class="fas fa-chart-line me-2"></i>Generate Interactive Charts';
+    }
+});
+
+// Download CSV button
+document.getElementById('downloadCsvBtn').addEventListener('click', async function() {
+    if (!generatedData) {
+        showAlert('No data to download. Please generate data first.', 'warning');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/download_data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                patients_data: generatedData
+            })
+        });
+        
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `scoliosis_data_${new Date().toISOString().slice(0,10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            showAlert('CSV file downloaded successfully!', 'success');
+        } else {
+            showAlert('Error downloading CSV file', 'danger');
+        }
+    } catch (error) {
+        showAlert('Error: ' + error.message, 'danger');
+    }
+});
+
+// Download JSON button
+document.getElementById('downloadJsonBtn').addEventListener('click', function() {
+    if (!generatedData) {
+        showAlert('No data to download. Please generate data first.', 'warning');
+        return;
+    }
+    
+    const dataStr = JSON.stringify(generatedData, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    const url = URL.createObjectURL(dataBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `scoliosis_data_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    showAlert('JSON file downloaded successfully!', 'success');
+});
+</script>
+{% endblock %}

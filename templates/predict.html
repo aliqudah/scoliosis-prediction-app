@@ -1,0 +1,427 @@
+{% extends "base.html" %}
+
+{% block title %}Curve Progression Prediction - Scoliosis Prediction System{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-4 text-center mb-5">
+                <i class="fas fa-chart-line me-3"></i>
+                Curve Progression Prediction
+            </h1>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Input Form -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user me-2"></i>
+                        Patient Parameters
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="predictionForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="age" class="form-label">Age (years)</label>
+                                    <input type="number" class="form-control" id="age" min="10" max="16" step="0.1" value="13.0" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="sex" class="form-label">Sex</label>
+                                    <select class="form-control" id="sex" required>
+                                        <option value="">Select...</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Male">Male</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="risserSign" class="form-label">Risser Sign</label>
+                                    <select class="form-control" id="risserSign" required>
+                                        <option value="">Select...</option>
+                                        <option value="0">0 (Immature)</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5 (Mature)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="bmi" class="form-label">BMI</label>
+                                    <input type="number" class="form-control" id="bmi" min="15" max="30" step="0.1" value="20.0" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="initialCobb" class="form-label">Initial Cobb Angle (°)</label>
+                            <input type="number" class="form-control" id="initialCobb" min="10" max="40" step="0.1" value="20.0" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="curvePattern" class="form-label">Curve Pattern</label>
+                            <select class="form-control" id="curvePattern" required>
+                                <option value="">Select...</option>
+                                <option value="Right thoracic">Right thoracic</option>
+                                <option value="Left thoracic">Left thoracic</option>
+                                <option value="Thoracolumbar">Thoracolumbar</option>
+                                <option value="Double major">Double major</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="flexibility" class="form-label">Spine Flexibility (%)</label>
+                            <input type="number" class="form-control" id="flexibility" min="30" max="90" step="0.1" value="65.0" required>
+                            <div class="form-text">Percentage correction on lateral bending</div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-calculator me-2"></i>
+                            Calculate Prediction
+                        </button>
+                    </form>
+                    
+                    <!-- Loading indicator -->
+                    <div id="loading" class="loading text-center mt-3">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Calculating prediction...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Risk Information Card -->
+            <div class="card mt-4">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Risk Scoring Guide
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <small>
+                        <div class="mb-2"><strong>Risk Factors:</strong></div>
+                        <ul class="list-unstyled small">
+                            <li>• Age < 13 years: +2 points</li>
+                            <li>• Female sex: +1 point</li>
+                            <li>• Risser ≤ 2: +3 points</li>
+                            <li>• Cobb > 25°: +2 points</li>
+                        </ul>
+                        <div class="mt-2">
+                            <span class="badge bg-success">Low Risk</span> ≤5° progression<br>
+                            <span class="badge bg-warning">Moderate</span> 5-10° progression<br>
+                            <span class="badge bg-danger">High Risk</span> >10° progression
+                        </div>
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Results Panel -->
+        <div class="col-lg-8">
+            <div id="resultsPanel" style="display: none;">
+                <!-- Prediction Summary -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Prediction Summary
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" id="predictionSummary">
+                            <!-- Prediction summary will be populated here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Interactive Prediction Visualizations -->
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Interactive Prediction Charts
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div id="progressionChart" class="plotly-chart"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <div id="riskFactorsChart" class="plotly-chart"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Treatment Recommendation -->
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-stethoscope me-2"></i>
+                            Treatment Recommendation
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="treatmentRecommendation">
+                            <!-- Treatment recommendation will be populated here -->
+                        </div>
+                        <div class="alert alert-warning mt-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Disclaimer:</strong> These predictions are for research and educational purposes only. 
+                            Clinical decisions should always be made by qualified healthcare professionals in consultation 
+                            with the patient and their family.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Example Cases -->
+            <div id="exampleCases" class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Example Cases
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">Try these example cases to see how different parameters affect progression risk:</p>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 h-100">
+                                <h6 class="text-danger">High Risk Example</h6>
+                                <small class="text-muted">
+                                    12-year-old female<br>
+                                    Risser 1, 28° Cobb<br>
+                                    Double major curve
+                                </small>
+                                <button class="btn btn-sm btn-outline-danger mt-2 example-btn" 
+                                        data-age="12.0" data-sex="Female" data-risser="1" data-bmi="19.5" 
+                                        data-cobb="28.0" data-pattern="Double major" data-flexibility="60.0">
+                                    Load Example
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 h-100">
+                                <h6 class="text-warning">Moderate Risk Example</h6>
+                                <small class="text-muted">
+                                    13.5-year-old female<br>
+                                    Risser 3, 22° Cobb<br>
+                                    Right thoracic curve
+                                </small>
+                                <button class="btn btn-sm btn-outline-warning mt-2 example-btn"
+                                        data-age="13.5" data-sex="Female" data-risser="3" data-bmi="20.0" 
+                                        data-cobb="22.0" data-pattern="Right thoracic" data-flexibility="65.0">
+                                    Load Example
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 h-100">
+                                <h6 class="text-success">Low Risk Example</h6>
+                                <small class="text-muted">
+                                    14-year-old male<br>
+                                    Risser 4, 18° Cobb<br>
+                                    Thoracolumbar curve
+                                </small>
+                                <button class="btn btn-sm btn-outline-success mt-2 example-btn"
+                                        data-age="14.0" data-sex="Male" data-risser="4" data-bmi="21.0" 
+                                        data-cobb="18.0" data-pattern="Thoracolumbar" data-flexibility="70.0">
+                                    Load Example
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentPrediction = null;
+
+document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // Get form data
+    const formData = {
+        age: parseFloat(document.getElementById('age').value),
+        sex: document.getElementById('sex').value,
+        risser_sign: parseInt(document.getElementById('risserSign').value),
+        bmi: parseFloat(document.getElementById('bmi').value),
+        initial_cobb: parseFloat(document.getElementById('initialCobb').value),
+        curve_pattern: document.getElementById('curvePattern').value,
+        flexibility: parseFloat(document.getElementById('flexibility').value)
+    };
+    
+    // Show loading
+    showLoading('loading');
+    document.getElementById('resultsPanel').style.display = 'none';
+    document.getElementById('exampleCases').style.display = 'none';
+    
+    try {
+        const response = await fetch('/api/predict', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            currentPrediction = result.prediction;
+            displayPredictionResults(result.prediction, formData);
+            generatePredictionVisualizations(result.prediction, formData);
+            showAlert('Prediction calculated successfully!', 'success');
+        } else {
+            showAlert('Error calculating prediction: ' + result.error, 'danger');
+        }
+    } catch (error) {
+        showAlert('Error: ' + error.message, 'danger');
+    } finally {
+        hideLoading('loading');
+    }
+});
+
+function displayPredictionResults(prediction, patientData) {
+    // Display prediction summary
+    const summaryDiv = document.getElementById('predictionSummary');
+    const riskColor = prediction.risk_level === 'High' ? 'danger' : 
+                     prediction.risk_level === 'Moderate' ? 'warning' : 'success';
+    
+    summaryDiv.innerHTML = `
+        <div class="col-md-3">
+            <div class="text-center">
+                <h4 class="text-${riskColor}">${prediction.risk_level}</h4>
+                <small class="text-muted">Risk Level</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="text-center">
+                <h4 class="text-primary">${prediction.risk_score}</h4>
+                <small class="text-muted">Risk Score</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="text-center">
+                <h4 class="text-info">${prediction.total_progression}°</h4>
+                <small class="text-muted">24m Progression</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="text-center">
+                <h4 class="text-secondary">${Math.round(prediction.progression_probability * 100)}%</h4>
+                <small class="text-muted">Progression Probability</small>
+            </div>
+        </div>
+    `;
+    
+    // Display treatment recommendation
+    const treatmentDiv = document.getElementById('treatmentRecommendation');
+    const recommendationColor = prediction.recommendation.includes('Surgical') ? 'danger' :
+                               prediction.recommendation.includes('Bracing') ? 'warning' : 'success';
+    
+    treatmentDiv.innerHTML = `
+        <div class="alert alert-${recommendationColor} d-flex align-items-center">
+            <i class="fas fa-${prediction.recommendation.includes('Surgical') ? 'user-md' : 
+                                prediction.recommendation.includes('Bracing') ? 'shield-alt' : 'eye'} me-3 fa-2x"></i>
+            <div>
+                <h6 class="mb-1">Recommended Action:</h6>
+                <p class="mb-0">${prediction.recommendation}</p>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-4">
+                <strong>6-month prediction:</strong><br>
+                ${prediction.predicted_cobb_6m}°
+            </div>
+            <div class="col-md-4">
+                <strong>12-month prediction:</strong><br>
+                ${prediction.predicted_cobb_12m}°
+            </div>
+            <div class="col-md-4">
+                <strong>24-month prediction:</strong><br>
+                ${prediction.predicted_cobb_24m}°
+            </div>
+        </div>
+    `;
+    
+    // Show results panel
+    document.getElementById('resultsPanel').style.display = 'block';
+}
+
+async function generatePredictionVisualizations(prediction, patientData) {
+    try {
+        const response = await fetch('/api/visualize_prediction', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                prediction: prediction,
+                patient_data: patientData
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            const graphs = result.graphs;
+            
+            // Render progression chart
+            Plotly.newPlot('progressionChart', JSON.parse(graphs.progression).data, 
+                          JSON.parse(graphs.progression).layout, {responsive: true});
+            
+            // Render risk factors chart
+            Plotly.newPlot('riskFactorsChart', JSON.parse(graphs.risk_factors).data, 
+                          JSON.parse(graphs.risk_factors).layout, {responsive: true});
+            
+        } else {
+            showAlert('Error generating prediction charts: ' + result.error, 'warning');
+        }
+    } catch (error) {
+        showAlert('Error generating charts: ' + error.message, 'warning');
+    }
+}
+
+// Example case loading
+document.querySelectorAll('.example-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.getElementById('age').value = this.dataset.age;
+        document.getElementById('sex').value = this.dataset.sex;
+        document.getElementById('risserSign').value = this.dataset.risser;
+        document.getElementById('bmi').value = this.dataset.bmi;
+        document.getElementById('initialCobb').value = this.dataset.cobb;
+        document.getElementById('curvePattern').value = this.dataset.pattern;
+        document.getElementById('flexibility').value = this.dataset.flexibility;
+        
+        showAlert('Example case loaded successfully! Click "Calculate Prediction" to see results.', 'info');
+    });
+});
+</script>
+{% endblock %}

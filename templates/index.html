@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Scoliosis Prediction System - Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-3 fw-bold mb-4">
+                    Scoliosis Prediction System
+                </h1>
+                <p class="lead mb-4">
+                    Advanced predictive modeling for adolescent idiopathic scoliosis curve progression. 
+                    Generate synthetic datasets and predict treatment outcomes with interactive visualizations.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="{{ url_for('generate_data_page') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-database me-2"></i>
+                        Generate Data
+                    </a>
+                    <a href="{{ url_for('predict_page') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Make Prediction
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="fas fa-user-md" style="font-size: 15rem; opacity: 0.1;"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12 text-center mb-5">
+            <h2 class="display-5 fw-bold">Key Features</h2>
+            <p class="lead text-muted">Comprehensive tools for scoliosis research and clinical decision-making</p>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <!-- Feature 1: Data Generation -->
+        <div class="col-lg-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="feature-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h4 class="card-title">Synthetic Data Generation</h4>
+                    <p class="card-text">
+                        Generate up to 10,000 synthetic patient records with realistic demographics, 
+                        Cobb angles, and progression patterns based on clinical data distributions.
+                    </p>
+                    <ul class="list-unstyled text-start">
+                        <li><i class="fas fa-check text-success me-2"></i>Age-appropriate demographics</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Risser sign progression</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Multiple curve patterns</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Follow-up progression data</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('generate_data_page') }}" class="btn btn-primary">
+                        <i class="fas fa-play me-2"></i>Start Generating
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Feature 2: Interactive Visualizations -->
+        <div class="col-lg-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h4 class="card-title">Interactive Visualizations</h4>
+                    <p class="card-text">
+                        Explore data with interactive Plotly charts. Zoom, hover, and filter through 
+                        patient demographics, progression patterns, and risk distributions.
+                    </p>
+                    <ul class="list-unstyled text-start">
+                        <li><i class="fas fa-check text-success me-2"></i>Age & sex distributions</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Cobb angle progressions</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Risk level analysis</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Responsive design</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('generate_data_page') }}" class="btn btn-success">
+                        <i class="fas fa-chart-line me-2"></i>View Charts
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Feature 3: Risk Prediction -->
+        <div class="col-lg-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="feature-icon">
+                        <i class="fas fa-stethoscope"></i>
+                    </div>
+                    <h4 class="card-title">Progression Prediction</h4>
+                    <p class="card-text">
+                        Input patient parameters to predict curve progression over 6, 12, and 24 months. 
+                        Get risk assessments and treatment recommendations.
+                    </p>
+                    <ul class="list-unstyled text-start">
+                        <li><i class="fas fa-check text-success me-2"></i>Multi-timepoint predictions</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Risk stratification</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Treatment recommendations</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Progression curves</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('predict_page') }}" class="btn btn-warning">
+                        <i class="fas fa-calculator me-2"></i>Make Prediction
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Section -->
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12 text-center mb-5">
+            <h2 class="display-5 fw-bold">Clinical Parameters</h2>
+            <p class="lead text-muted">Based on established clinical research and risk factors</p>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number">10-16</div>
+                <p class="mb-0">Age Range (years)</p>
+                <small class="text-muted">Adolescent idiopathic scoliosis</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number">80%</div>
+                <p class="mb-0">Female Prevalence</p>
+                <small class="text-muted">Higher risk in females</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number">0-5</div>
+                <p class="mb-0">Risser Scale</p>
+                <small class="text-muted">Skeletal maturity indicator</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number">10-40°</div>
+                <p class="mb-0">Initial Cobb Range</p>
+                <small class="text-muted">Curve severity measurement</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Risk Factors Section -->
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Progression Risk Factors
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-danger">High Risk Factors:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-arrow-up text-danger me-2"></i>Age < 13 years (+2 points)</li>
+                                <li><i class="fas fa-arrow-up text-danger me-2"></i>Female sex (+1 point)</li>
+                                <li><i class="fas fa-arrow-up text-danger me-2"></i>Risser sign ≤ 2 (+3 points)</li>
+                                <li><i class="fas fa-arrow-up text-danger me-2"></i>Initial Cobb > 25° (+2 points)</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-warning">Additional Considerations:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-info-circle text-info me-2"></i>Curve pattern type</li>
+                                <li><i class="fas fa-info-circle text-info me-2"></i>Spine flexibility</li>
+                                <li><i class="fas fa-info-circle text-info me-2"></i>Body mass index</li>
+                                <li><i class="fas fa-info-circle text-info me-2"></i>Growth velocity</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <strong>Note:</strong> This prediction system is designed for research and educational purposes. 
+                        Clinical decisions should always involve qualified medical professionals.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Call to Action -->
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto text-center">
+            <div class="card bg-primary text-white">
+                <div class="card-body p-5">
+                    <h3 class="card-title mb-4">Ready to Get Started?</h3>
+                    <p class="card-text mb-4">
+                        Begin by generating synthetic patient data or input a patient's parameters for progression prediction.
+                    </p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{{ url_for('generate_data_page') }}" class="btn btn-light btn-lg">
+                            <i class="fas fa-database me-2"></i>
+                            Generate Dataset
+                        </a>
+                        <a href="{{ url_for('predict_page') }}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Predict Progression
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
