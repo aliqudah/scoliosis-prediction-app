@@ -1,4 +1,4 @@
-# Scoliosis Prediction System - Web Application
+# Scoliosis Prediction System
 
 A comprehensive web application for predicting adolescent idiopathic scoliosis curve progression using advanced deep learning algorithms.
 
@@ -198,4 +198,5 @@ For technical support or questions about the application, please refer to the do
 ---
 
 **Disclaimer**: This application is for research and educational purposes only. It should not be used as the sole basis for clinical decision-making. Always consult with qualified healthcare professionals for patient care.
+
 
